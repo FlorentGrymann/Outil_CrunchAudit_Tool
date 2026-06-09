@@ -1,0 +1,505 @@
+================================================================================
+                    CRUNCHAUDIT_TOOL - MODE D'EMPLOI
+================================================================================
+
+TABLE DES MATIÈRES
+------------------
+1. Présentation générale
+2. Installation et lancement
+3. Arborescence des dossiers
+4. L'interface principale
+5. Onglet 1 : Performance Analysis
+   5.1. Sélection des cas
+   5.2. Gestion des fichiers à exporter
+   5.3. Lancement de l'analyse
+   5.4. Améliorations détectées
+6. Onglet 2 : Results Comparison
+   6.1. Sélection des cas à comparer
+   6.2. Seuils de tolérance
+   6.3. Lancement de la comparaison
+   6.4. Interprétation des résultats
+   6.5. Export CSV
+7. Gestion des Databases
+   7.1. Database globale (CrunchDatabase)
+   7.2. Databases par cas (RunDatabase)
+   7.3. Export automatique
+8. Bouton Restart
+9. Fichiers de configuration
+10. Dépannage et astuces
+
+================================================================================
+1. PRÉSENTATION GÉNÉRALE
+================================================================================
+
+CrunchAudit_Tool est un outil complet qui permet de :
+
+- Lancer des benchmarks de performance sur des cas de simulation CrunchODiTi
+- Comparer les temps d'exécution entre une version de référence et une version de test
+- Exporter automatiquement les fichiers d'entrée et de sortie
+- Comparer les résultats numériques entre les cas de référence et de test
+- Gérer et exporter les databases (CrunchDatabase et RunDatabase)
+- Exporter les comparaisons au format CSV
+
+L'application fonctionne en deux modes principaux :
+  1. Analyse de performance (onglet 1) : mesure et compare les temps d'exécution
+  2. Comparaison de résultats (onglet 2) : compare les fichiers de sortie numériques
+
+================================================================================
+2. INSTALLATION ET LANCEMENT
+================================================================================
+
+EMPLACEMENT DE L'APPLICATION :
+-----------------------------
+L'application CrunchAudit_Tool doit être placée dans le même dossier que 
+CrunchODiTi.exe (généralement dans C:\Program Files\...\CrunchODiTi\).
+
+Les fichiers de travail (résultats, databases, configurations) sont 
+automatiquement créés dans :
+    C:\Users\[Nom]\Documents\CrunchODiTi\
+
+Cette séparation garantit :
+- Que l'application fonctionne même dans un dossier protégé (Program Files)
+- Que tous les fichiers générés sont dans un dossier accessible en écriture
+- Une organisation claire entre les fichiers source et les fichiers de travail
+
+POUR LANCER L'APPLICATION :
+--------------------------
+Double-cliquez sur CrunchAudit_Tool.exe dans le dossier de l'application.
+
+Au lancement, l'application :
+1. Détecte automatiquement tous les cas disponibles
+2. Exporte la database globale (CrunchDatabase) vers Documents/CrunchODiTi/Database/
+3. Vérifie et exporte les databases de chaque cas (RunDatabase)
+4. Affiche l'interface prête à l'emploi
+
+================================================================================
+3. ARBORESCENCE DES DOSSIERS
+================================================================================
+
+L'application utilise DEUX emplacements distincts :
+
+A) DOSSIER DE L'APPLICATION (C:\Program Files\...\CrunchODiTi\) :
+----------------------------------------------------------------
+Contient les fichiers source (lecture seule pour l'application) :
+
+CrunchODiTi/
+│
+├── CrunchODiTi.exe                                                         ← Exécutable de simulation
+├── CrunchAudit_Tool.exe                                             ← L'outil d'audit (CE FICHIER)
+├── CrunchDatabase_ThermoChimie_v12a.dbs      ← Database globale
+├── CrunchODiTi_syntaxhighlight.xml                  ← Fichier de syntaxe
+│
+├── exercices/                                                                     ← Dossier d'exercices (si présent)
+│   └── CrunchDatabase_ThermoChimie_v12a.dbs ← Database globale (copie)
+│
+├── [Nom_cas_1]/                                                                    ← Dossier d'un cas
+│   ├── input_1.in                                                                 ← Fichier d'entrée (référence)
+│   ├── input_2.in                                                                 ← Fichier d'entrée (test)
+│   ├── tabulated.out                                                         ← Fichier de sortie (résultats)
+│   ├── proc_0Crunchfile.xyz.1                                     ← Fichier de maillage
+│   ├── proc_0Crunchfile.xyz.2                                     ← Dernier maillage
+│   └── autres_fichiers...                                                ← Fichiers supplémentaires
+│
+└── [Nom_cas_2]/                                                                    ← Autre cas...
+
+B) DOSSIER DOCUMENTS (C:\Users\[Nom]\Documents\CrunchODiTi\) :
+--------------------------------------------------------------
+Contient TOUS les fichiers générés par l'application :
+
+Documents/CrunchODiTi/
+│
+├── Database/                                                                                                             ←  EXPORT DES DATABASES
+│   ├── CrunchDatabase_ThermoChimie_v12a_20260101_12h00.dbs  ← Database globale
+│   ├── [Nom_cas_1]/                                                                                                  ← Database du cas 1
+│   │   ├── RunDatabase_20260101_12h00.dbs
+│   │   └── RunDatabase_20260102_15h30.dbs                                              ← Nouvelle version
+│   └── [Nom_cas_2]/                                                                                                  ← Database du cas 2
+│       └── RunDatabase_20260101_12h00.dbs
+│
+├── reference/                                                                                                          ←  DOSSIER DE RÉFÉRENCE
+│   └── [Nom_cas]/
+│       ├── input/
+│       │   └── *.in                                                                                                          ← Fichiers d'entrée référence
+│       └── output/
+│           └── *                                                                                                                  ← Fichiers de sortie référence
+│
+├── test/                                                                                                                       ←  DOSSIER DE TEST
+│   └── [Nom_cas]/
+│       ├── input/
+│       │   └── [horodatage]_*.in                                                                            ← Fichiers d'entrée test
+│       └── output/
+│           └── [horodatage]_*                                                                                    ← Fichiers de sortie test
+│
+├── resultats_timeout/                                                                                      ←  RÉSULTATS DE PERFORMANCE
+│   └── resultats_time_out.csv                                                                       ← Temps d'exécution
+│
+├── comparaisons/                                                                                                 ←  COMPARAISONS NUMÉRIQUES
+│   └── comparaisons.csv                                                                                     ← Résultats des comparaisons
+│
+├── extra_files_config.json                                                                           ←  Configuration fichiers supp.
+└── export_lists_config.json                                                                        ←  Listes d'export par cas
+
+================================================================================
+4. L'INTERFACE PRINCIPALE
+================================================================================
+
+L'interface est composée de :
+
+- Une fenêtre globale "CrunchAudit_Tool" (1200x800 pixels)
+- Un bouton "Restart" en haut à gauche (toujours accessible)
+- Deux onglets principaux :
+  • "Performance Analysis" : analyse des temps d'exécution
+  • "Results Comparison" : comparaison des résultats numériques
+- Une zone de logs détaillés en bas de l'onglet Performance Analysis
+
+Les logs affichent :
+- La progression étape par étape (1/5 à 5/5)
+- Les fichiers trouvés et exportés
+- Les résultats de performance avec pourcentages
+- L'état des exports de databases
+- Les erreurs éventuelles avec leur détail
+
+================================================================================
+5. ONGLET 1 : PERFORMANCE ANALYSIS
+================================================================================
+
+5.1. SÉLECTION DES CAS
+----------------------
+
+La partie gauche affiche la liste des cas détectés automatiquement dans 
+le dossier de l'application.
+
+Les cas sont classés en deux catégories :
+
+- NEW CASES (en bleu) : Cas sans référence existante
+  → Si coché, une nouvelle référence sera créée lors du lancement
+  
+- KNOWN CASES (en noir) : Cas avec référence déjà existante
+  → La référence existe dans Documents/CrunchODiTi/reference/
+
+Pour sélectionner/désélectionner :
+- Cochez les cases individuellement
+- Utilisez la case "ALL" pour tout sélectionner/désélectionner
+
+Bouton ✕ : Supprime un cas de la liste (non destructif pour les fichiers)
+
+5.2. GESTION DES FICHIERS À EXPORTER
+------------------------------------
+
+Cliquez sur "▶ Output files" pour déplier la zone de configuration.
+
+LA ZONE DE TEXTE affiche les fichiers qui seront exportés :
+- Par défaut : tous les .in, .out et le dernier proc_0Crunchfile.xyz
+- Format : noms séparés par des virgules
+- Vous pouvez MODIFIER DIRECTEMENT cette zone
+
+POUR AJOUTER UN FICHIER :
+1. Tapez son nom dans la zone de texte (après une virgule)
+2. Le bouton "Add" devient vert
+3. Cliquez sur "Add" pour sauvegarder
+
+POUR SUPPRIMER UN FICHIER :
+1. Effacez son nom dans la zone de texte
+2. Cliquez sur "Add" pour sauvegarder
+
+IMPORTANT : Les modifications sont SAUVEGARDÉES automatiquement dans
+export_lists_config.json et seront réutilisées au prochain lancement.
+
+Si un fichier n'existe pas dans le dossier du cas :
+→ Message "⚠ Not found: [nom_fichier]"
+→ Vérifiez l'orthographe exacte du nom du fichier
+
+5.3. LANCEMENT DE L'ANALYSE
+---------------------------
+
+1. Sélectionnez les cas à analyser dans la liste de gauche
+2. Configurez les fichiers à exporter si nécessaire
+3. Cliquez sur "▶ Start" (bouton vert)
+
+L'analyse effectue les étapes suivantes :
+
+ÉTAPE 1/5 - Nettoyage :
+- Suppression des fichiers temporaires (.out, .rst, .vtk, .tec)
+- Suppression des anciens fichiers .xyz
+
+ÉTAPE 2/5 - Identification :
+- Repérage du fichier d'entrée de référence (le plus ancien .in)
+- Repérage du fichier d'entrée de test (le plus récent .in)
+
+ÉTAPE 3/5 - Exécution référence :
+- Lancement de CrunchODiTi.exe avec le fichier de référence
+- Mesure du temps d'exécution (timeout : 300 secondes)
+
+ÉTAPE 4/5 - Exécution test :
+- Lancement de CrunchODiTi.exe avec le fichier de test
+- Mesure du temps d'exécution
+
+ÉTAPE 5/5 - Export :
+- Sauvegarde des temps dans resultats_time_out.csv
+- Copie des fichiers dans test/ et creation/mise à jour de reference/
+- Export des databases si présentes (RunDatabase)
+
+Pendant l'exécution :
+- La barre de progression indique l'avancement
+- Les logs détaillés s'affichent en temps réel
+- Le bouton "Restart" permet d'interrompre l'analyse
+
+5.4. AMÉLIORATIONS DÉTECTÉES
+----------------------------
+
+Après l'analyse, la partie droite affiche UNIQUEMENT les cas où le test
+est plus rapide que la référence.
+
+Pour chaque cas affiché :
+- Temps de référence 
+- Temps de test 
+- Différence en secondes et en pourcentage
+
+IMPORTANT : Lors du premier lancement, le programme peut afficher un 
+meilleur score car le système charge les bibliothèques une première fois.
+Il est recommandé de relancer l'analyse pour confirmer l'amélioration.
+
+Pour mettre à jour une référence :
+1. Cochez les cas à mettre à jour
+2. Cliquez sur "Apply changes"
+3. Les fichiers de test deviennent la nouvelle référence
+
+================================================================================
+6. ONGLET 2 : RESULTS COMPARISON
+================================================================================
+
+6.1. SÉLECTION DES CAS À COMPARER
+---------------------------------
+
+La liste affiche UNIQUEMENT les cas présents à la fois dans :
+- Documents/CrunchODiTi/test/
+- Documents/CrunchODiTi/reference/
+
+Cochez les cas à comparer ou utilisez "Select all".
+
+6.2. SEUILS DE TOLÉRANCE
+------------------------
+
+Configurez les seuils pour le code couleur :
+
+- GREEN threshold (max) : Différence ≤ ce seuil → VERT (résultats identiques)
+  Valeur par défaut : 1e-9
+
+- RED threshold (min) : Différence ≥ ce seuil → ROUGE (différence significative)
+  Valeur par défaut : 1e-6
+
+- ORANGE : Automatiquement entre les deux seuils (à vérifier)
+
+6.3. LANCEMENT DE LA COMPARAISON
+--------------------------------
+
+Cliquez sur "▶ Compare" pour lancer la comparaison.
+
+L'outil compare deux types de fichiers :
+- tabulated.out : Fichier de résultats tabulés
+- proc_0Crunchfile.xyz : Fichier de maillage/sortie
+
+La progression est affichée dans les logs.
+
+6.4. INTERPRÉTATION DES RÉSULTATS
+---------------------------------
+
+Pour chaque cas et chaque fichier, vous verrez :
+
+A) RÉSUMÉ DU PIRE ÉCART (bandeau coloré)
+   - Colonne où l'écart est maximum
+   - Valeur de l'écart maximum (Δmax)
+   - Position précise (ligne et colonne)
+   - Statut avec code couleur
+
+   🟢 VERT    : Écart ≤ seuil green → Résultats identiques
+   🟠 ORANGE  : Seuil green < Écart < seuil red → Vérifier
+   🔴 ROUGE   : Écart ≥ seuil red → Différence significative
+   ⚪ GRIS    : Pas de données numériques comparables
+
+B) VÉRIFICATION DES TERMES (Term check)
+    Tous les termes sont présents et correctement positionnés
+   
+   Ou problèmes détectés :
+    MISSING   : Terme manquant (attendu mais absent)
+   ⚠ EXTRA     : Terme supplémentaire (non attendu)
+   ↔ DIFFERENT  : Terme différent à la même position
+
+C) LÉGENDE DES SEUILS
+   Rappel des valeurs utilisées pour cette comparaison
+
+6.5. EXPORT CSV
+---------------
+
+Cliquez sur " Export CSV" pour sauvegarder les résultats dans :
+    Documents/CrunchODiTi/comparaisons/comparaisons.csv
+
+Format du CSV :
+    date;cas;fichier;colonne;col_index;delta_max;row_index;statut
+
+Le fichier est en mode "append" : les nouvelles comparaisons s'ajoutent
+sans écraser les précédentes.
+
+================================================================================
+7. GESTION DES DATABASES
+================================================================================
+
+7.1. DATABASE GLOBALE (CrunchDatabase)
+--------------------------------------
+
+L'application recherche automatiquement le fichier :
+    CrunchDatabase_ThermoChimie_v*.dbs
+
+Dans le dossier exercices/ ou à la racine du dossier de l'application.
+
+EXPORT AUTOMATIQUE :
+- Au lancement de l'application
+- Lors du clic sur "Restart"
+- Le fichier est copié dans Documents/CrunchODiTi/Database/
+- Un horodatage est ajouté au nom du fichier
+
+COMPARAISON AVANT EXPORT :
+- Si un fichier identique (même taille, même date) existe déjà → pas d'export
+- Si une nouvelle version est détectée → export avec nouvel horodatage
+- Message dans les logs : "Fichier identique déjà présent" ou "Nouvelle version détectée"
+
+7.2. DATABASES PAR CAS (RunDatabase)
+------------------------------------
+
+Pour chaque cas analysé, l'application vérifie la présence d'un fichier :
+    RunDatabase.dbs
+
+Dans le dossier du cas (recherche récursive).
+
+EXPORT PAR CAS :
+- Le fichier est copié dans Documents/CrunchODiTi/Database/[Nom_cas]/
+- Un sous-dossier est créé pour chaque cas
+- Horodatage ajouté au nom : RunDatabase_20260101_12h00.dbs
+
+COMPARAISON AVANT EXPORT :
+- Si un fichier existe déjà avec le même contenu → pas d'export
+- Si le contenu est différent → export avec nouvel horodatage
+- Conservation de l'historique (les anciennes versions sont gardées)
+
+7.3. EXPORT AUTOMATIQUE
+-----------------------
+
+L'export des databases est automatique :
+- Au lancement de l'application (database globale + toutes les databases des cas)
+- Après chaque analyse de cas (vérification du RunDatabase du cas)
+- Lors du clic sur "Restart"
+
+Les logs affichent le détail de chaque export :
+- Fichier trouvé ou non
+- Comparaison avec l'existant
+- Résultat de l'export (succès ou erreur)
+
+================================================================================
+8. BOUTON RESTART
+================================================================================
+
+Le bouton "Restart" en haut à gauche est TOUJOURS accessible.
+
+Il permet de :
+- Réinitialiser complètement l'onglet Performance Analysis
+- Vider les logs et la barre de progression
+- Réinitialiser les résultats de comparaison
+- Rafraîchir la liste des cas disponibles
+- Relancer l'export des databases
+
+CAS D'USAGE :
+- Interrompre une analyse en cours
+- Après une erreur pour repartir à zéro
+- Rafraîchir la liste après modifications manuelles des dossiers
+- Forcer une nouvelle vérification des databases
+
+Le restart préserve votre onglet actif.
+
+================================================================================
+9. FICHIERS DE CONFIGURATION
+================================================================================
+
+Tous les fichiers générés sont dans Documents/CrunchODiTi/ :
+
+A) Database/
+   ├── CrunchDatabase_*.dbs                  ← Databases globales exportées
+   └── [Nom_cas]/RunDatabase_*.dbs    ← Databases par cas exportées
+
+B) reference/                                                  ← Fichiers de référence
+   └── [Nom_cas]/input/ et output/
+
+C) test/                                                              ← Fichiers de test horodatés
+   └── [Nom_cas]/input/ et output/
+
+D) resultats_timeout/
+   └── resultats_time_out.csv              ← Résultats des benchmarks
+       Colonnes : case, date, A, B, compare, pourcentage_difference
+
+E) comparaisons/
+   └── comparaisons.csv                            ← Résultats des comparaisons
+       Colonnes : date, cas, fichier, colonne, col_index, delta_max, row_index, statut
+
+F) extra_files_config.json                     ← Configuration fichiers supplémentaires
+
+G) export_lists_config.json                  ← Listes d'export personnalisées par cas
+
+================================================================================
+10. DÉPANNAGE ET ASTUCES
+================================================================================
+
+PROBLÈMES COURANTS :
+-------------------
+
+PROBLÈME : "File not found" lors de l'ajout d'un fichier
+SOLUTION : Vérifiez l'orthographe exacte du nom (sensible à la casse).
+           Le fichier doit exister dans le dossier du cas.
+
+PROBLÈME : Le bouton Start ne fait rien
+SOLUTION : Sélectionnez au moins un cas dans la liste de gauche.
+
+PROBLÈME : Les comparaisons ne montrent rien
+SOLUTION : Vérifiez que les dossiers test/ et reference/ existent dans
+           Documents/CrunchODiTi/ et contiennent les fichiers nécessaires.
+
+PROBLÈME : "tabulated.out introuvable" dans la comparaison
+SOLUTION : Supprimez le dossier du cas dans reference/ et relancez
+           l'analyse de performance pour recréer la référence.
+
+PROBLÈME : L'application ne trouve pas CrunchODiTi.exe
+SOLUTION : Vérifiez que CrunchAudit_Tool.exe est dans le même dossier
+           que CrunchODiTi.exe.
+
+PROBLÈME : Erreur d'accès refusé (PermissionError)
+SOLUTION : C'est normal, l'application écrit dans Documents/ et non
+           dans Program Files. Vérifiez que Documents/CrunchODiTi/ existe.
+
+ASTUCES :
+--------
+
+ASTUCE : Pour réinitialiser complètement un cas
+1. Supprimez son dossier dans Documents/CrunchODiTi/reference/
+2. Supprimez son dossier dans Documents/CrunchODiTi/test/
+3. Cliquez sur "Restart" dans l'application
+4. Le cas apparaîtra comme "NEW" (en bleu)
+
+ASTUCE : Pour forcer l'export d'un fichier spécifique
+1. Dépliez "▶ Output files" du cas concerné
+2. Ajoutez le nom du fichier dans la zone de texte
+3. Cliquez sur "Add"
+4. Le fichier sera inclus dans tous les prochains exports de ce cas
+
+ASTUCE : Suivre l'historique des databases
+- Consultez le dossier Documents/CrunchODiTi/Database/
+- Les anciennes versions sont conservées avec leur horodatage
+- Vous pouvez comparer les versions entre elles
+
+ASTUCE : Première utilisation
+1. Lancez l'application
+2. Cochez les cas "NEW" (en bleu) pour créer les références initiales
+3. Relancez l'analyse pour obtenir des comparaisons fiables
+4. Utilisez l'onglet "Results Comparison" pour vérifier les résultats
+
+================================================================================
+                        FIN DU MODE D'EMPLOI
+================================================================================
+
