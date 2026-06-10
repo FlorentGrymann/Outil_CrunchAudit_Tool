@@ -305,7 +305,7 @@ def export_global_database(log_func=None):
         log_func(f"[Database] ✓ Exporté : {dest_name}")
         return True, f"Exporté : {dest_name}"
     except Exception as e:
-        msg = f"❌ Erreur lors de l'export : {e}"
+        msg = f" Erreur lors de l'export : {e}"
         log_func(msg)
         return False, msg
 
@@ -353,7 +353,7 @@ def export_case_run_database(case_name, case_dir, log_func=None):
         log_func(f"[Database] ✓ Exporté : {case_name}/{dest_name}")
         return True, f"Exporté : {dest_name}", dest_path
     except Exception as e:
-        msg = f"❌ Erreur lors de l'export : {e}"
+        msg = f" Erreur lors de l'export : {e}"
         log_func(msg)
         return False, msg, None
 
@@ -367,12 +367,12 @@ def export_all_databases(log_func=None):
     log_func("[Database] DÉBUT DE L'EXPORT DES DATABASES")
     log_func("=" * 60)
 
-    log_func("\n📦 [Database] Export de la database globale...")
+    log_func("\n [Database] Export de la database globale...")
     success, msg = export_global_database(log_func)
     log_func(f"   Résultat : {msg}")
 
     cases = find_all_cases()
-    log_func(f"\n📦 [Database] Export des RunDatabase pour {len(cases)} cas...")
+    log_func(f"\n [Database] Export des RunDatabase pour {len(cases)} cas...")
 
     exported_count = 0
     for case_name, case_dir in cases.items():
@@ -660,7 +660,7 @@ def run_benchmark_case(case_name, case_dir, timestamp, is_new=False, extra_names
 
     except Exception as e:
         logs.append("")
-        logs.append(f"❌ ERREUR lors du traitement de {case_name}")
+        logs.append(f" ERREUR lors du traitement de {case_name}")
         logs.append(f"   {str(e)}")
         logs.append(f"   Traceback: {traceback.format_exc()}")
         logs.append("=" * 60)
