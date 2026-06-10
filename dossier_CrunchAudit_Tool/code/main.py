@@ -546,7 +546,7 @@ class App:
         
         for case in selected:
             case_dir = self.cases_dict[case]
-            self.log_print(f"📌 Mise à jour de la référence pour : {case}")
+            self.log_print(f" Mise à jour de la référence pour : {case}")
             logs = apply_reference_update(case, case_dir)
             self.log_lines(logs)
         
@@ -865,7 +865,7 @@ class App:
             else:
                 for (idx, ref_v, test_v, statut) in header_issues:
                     if statut == "MANQUANT":
-                        icon  = "❌"
+                        icon  = "X"
                         msg   = "Missing term at position {}  (expected: \"{}\")".format(
                             idx + 1, ref_v or "—")
                         color = "#c0392b"
